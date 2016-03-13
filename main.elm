@@ -24,6 +24,32 @@ hexagons =
 
   ]
 
+trim_coordinates : List (Int, Int) -> List (Int, Int)
+trim_coordinates coordinates =
+   let
+      x_range = toFloat ((maybeToInt (List.maximum (List.map fst coordinates))) - (maybeToInt (List.minimum (List.map fst coordinates))))
+      y_range = toFloat ((maybeToInt (List.maximum (List.map snd coordinates))) - (maybeToInt (List.minimum (List.map snd coordinates))))
+      x_error = abs (maybeToInt (List.minimum (List.map fst coordinates))) - ceiling (x_range / 2.0)
+      y_error = abs (maybeToInt (List.minimum (List.map snd coordinates))) - ceiling (y_range / 2.0)
+   in
+      List.map (modify_coordinate (x_error, 0)) coordinates
+
+modify_coordinate : (Int, Int) -> (Int, Int) -> (Int, Int)
+modify_coordinate init change =
+   let
+      (x,y) = init
+      (x_chg,y_chg) = change
+   in
+      (x+x_chg, y+y_chg)
+
+maybeToInt = withDefault 0
+
+withDefault : a -> Maybe a -> a
+withDefault default maybe =
+    case maybe of
+      Just value -> value
+      Nothing -> default
+
 draw_hexagon : Float -> (Int, Int) -> Form
 draw_hexagon r (x, y) =
   let
@@ -43,6 +69,7 @@ draw =
   collage 600 600
 
 main : Element
+-- main = draw (draw_hexagons (trim_coordinates hexagons))
 main = draw (draw_hexagons hexagons)
 
 niceColor : Color
@@ -52,4 +79,4 @@ niceColor =
       g = 200
       b = 255
    in
-      rgba r g b 0.6
+      rgba r g b 0.3
