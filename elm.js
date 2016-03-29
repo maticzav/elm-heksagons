@@ -5437,41 +5437,66 @@ Elm.Main.make = function (_elm) {
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var niceColor = function () {    var b = 255;var g = 200;var r = 100;return A4($Color.rgba,r,g,b,0.6);}();
-   var draw = A2($Graphics$Collage.collage,600,600);
-   var hexagons = _U.list([{ctor: "_Tuple2",_0: 0,_1: 0}
-                          ,{ctor: "_Tuple2",_0: 1,_1: 0}
-                          ,{ctor: "_Tuple2",_0: 1,_1: 1}
-                          ,{ctor: "_Tuple2",_0: 2,_1: 0}
-                          ,{ctor: "_Tuple2",_0: 2,_1: -1}
-                          ,{ctor: "_Tuple2",_0: 3,_1: 0}
-                          ,{ctor: "_Tuple2",_0: 3,_1: 1}
-                          ,{ctor: "_Tuple2",_0: 2,_1: -3}
-                          ,{ctor: "_Tuple2",_0: 3,_1: 4}
-                          ,{ctor: "_Tuple2",_0: -2,_1: 1}
-                          ,{ctor: "_Tuple2",_0: -5,_1: 4}
-                          ,{ctor: "_Tuple2",_0: -2,_1: -3}
-                          ,{ctor: "_Tuple2",_0: -3,_1: 4}
-                          ,{ctor: "_Tuple2",_0: -1,_1: 1}
-                          ,{ctor: "_Tuple2",_0: -2,_1: 4}]);
+   var niceColor = function () {    var b = 255;var g = 200;var r = 100;return A4($Color.rgba,r,g,b,0.3);}();
+   var withDefault = F2(function ($default,maybe) {    var _p0 = maybe;if (_p0.ctor === "Just") {    return _p0._0;} else {    return $default;}});
+   var maybeToInt = withDefault(0);
+   var modify_coordinate = F2(function (init,change) {
+      var _p1 = change;
+      var x_chg = _p1._0;
+      var y_chg = _p1._1;
+      var _p2 = init;
+      var x = _p2._0;
+      var y = _p2._1;
+      return {ctor: "_Tuple2",_0: x + x_chg,_1: y + y_chg};
+   });
+   var trim_coordinates = function (coordinates) {
+      var y_range = $Basics.toFloat(maybeToInt($List.maximum(A2($List.map,$Basics.snd,coordinates))) - maybeToInt($List.minimum(A2($List.map,
+      $Basics.snd,
+      coordinates))));
+      var y_error = $Basics.ceiling(y_range / 2.0) - maybeToInt($List.maximum(A2($List.map,$Basics.snd,coordinates)));
+      var x_range = $Basics.toFloat(maybeToInt($List.maximum(A2($List.map,$Basics.fst,coordinates))) - maybeToInt($List.minimum(A2($List.map,
+      $Basics.fst,
+      coordinates))));
+      var x_error = $Basics.ceiling(x_range / 2.0) - maybeToInt($List.maximum(A2($List.map,$Basics.fst,coordinates))) - A2($Basics._op["%"],
+      maybeToInt($List.maximum(A2($List.map,$Basics.fst,coordinates))),
+      2);
+      return A2($List.map,modify_coordinate({ctor: "_Tuple2",_0: x_error,_1: y_error}),coordinates);
+   };
+   var hexagons = trim_coordinates(_U.list([{ctor: "_Tuple2",_0: 1,_1: 1}
+                                           ,{ctor: "_Tuple2",_0: 2,_1: 1}
+                                           ,{ctor: "_Tuple2",_0: 3,_1: 1}
+                                           ,{ctor: "_Tuple2",_0: 4,_1: 1}]));
    var margin = 1;
-   var draw_hexagon = F2(function (r,_p0) {
-      var _p1 = _p0;
-      var _p3 = _p1._1;
-      var _p2 = _p1._0;
-      var pos_y = $Basics.toFloat(_p3 - A2($Basics._op["%"],_p2,2) * (_p2 / $Basics.abs(_p2) | 0) + A2($Basics._op["%"],
-      _p3,
-      2) * (_p3 / $Basics.abs(_p3) | 0)) * (r + margin) * $Basics.cos($Basics.pi / 6);
-      var pos_x = $Basics.toFloat(_p2) * (r + margin) * (1 + $Basics.cos($Basics.pi / 3));
+   var calculateFieldOfCoordinates = F2(function (coordinates,r) {
+      var y_range = maybeToInt($List.maximum(A2($List.map,$Basics.snd,coordinates))) - maybeToInt($List.minimum(A2($List.map,$Basics.snd,coordinates))) + 1;
+      var y_pieces = $Basics.round(y_range * 3 / 2 - $Basics.toFloat(A2($Basics._op["%"],y_range,2)));
+      var x_range = 2 * maybeToInt($List.maximum(_U.list([$Basics.abs(maybeToInt($List.maximum(A2($List.map,$Basics.fst,coordinates))))
+                                                         ,$Basics.abs(maybeToInt($List.minimum(A2($List.map,$Basics.fst,coordinates))))]))) + 1;
+      var x_pieces = $Basics.round(x_range * 3 / 2 - $Basics.toFloat(A2($Basics._op["%"],x_range,2)));
+      return {w: x_pieces * r + (x_range - 1) * margin,h: y_pieces * r + (y_range - 1) * margin};
+   });
+   var draw_hexagon = F2(function (r,_p3) {
+      var _p4 = _p3;
+      var _p5 = _p4._0;
+      var pos_y = $Basics.toFloat(_p4._1 * 2 + A2($Basics._op["%"],_p5,2)) * (r + margin) * $Basics.cos($Basics.pi / 6);
+      var pos_x = $Basics.toFloat(_p5) * (r + margin) * (1 + $Basics.cos($Basics.pi / 3));
       return A2($Graphics$Collage.move,{ctor: "_Tuple2",_0: pos_x,_1: pos_y},A2($Graphics$Collage.filled,niceColor,A2($Graphics$Collage.ngon,6,r)));
    });
    var r = 40;
+   var field = A2(calculateFieldOfCoordinates,hexagons,r);
+   var draw = A2($Graphics$Collage.collage,field.w,field.h);
    var draw_hexagons = function (hexagons) {    return A2($List.map,draw_hexagon(r),hexagons);};
    var main = draw(draw_hexagons(hexagons));
    return _elm.Main.values = {_op: _op
                              ,r: r
                              ,margin: margin
                              ,hexagons: hexagons
+                             ,trim_coordinates: trim_coordinates
+                             ,modify_coordinate: modify_coordinate
+                             ,maybeToInt: maybeToInt
+                             ,withDefault: withDefault
+                             ,field: field
+                             ,calculateFieldOfCoordinates: calculateFieldOfCoordinates
                              ,draw_hexagon: draw_hexagon
                              ,draw_hexagons: draw_hexagons
                              ,draw: draw

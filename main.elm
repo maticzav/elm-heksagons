@@ -6,18 +6,12 @@ r = 40
 margin = 1
 
 hexagons =
-   trim_coordinates [(0,1)
-   ,(0,2)
-   ,(0,3)
-   ,(0,4)
-   ,(1,1)
-   ,(1,3)
-   ,(1,4)
-   ,(2,1)
-   ,(2,2)
-   ,(2,4)
-   ,(3,2)
-   ,(3,4)
+   trim_coordinates [
+         (1,1),
+         (2,1),
+         (3,1),
+         (4,1),
+         (5,1)
   ]
 
 
@@ -51,17 +45,17 @@ withDefault default maybe =
 field = calculateFieldOfCoordinates hexagons r
 
 
-calculateFieldOfCoordinates : List (Int, Int) -> Float -> {w: Int, h: Int}
+calculateFieldOfCoordinates : List (Int, Int) -> Int -> {w: Int, h: Int}
 calculateFieldOfCoordinates coordinates r =
    let
-      y_range = (maybeToInt (List.maximum (List.map fst coordinates))) - (maybeToInt (List.minimum (List.map fst coordinates)))
-      x_range = (maybeToInt (List.maximum (List.map snd coordinates))) - (maybeToInt (List.minimum (List.map snd coordinates)))
+      x_range = (maybeToInt (List.maximum (List.map fst coordinates))) - (maybeToInt (List.minimum (List.map fst coordinates)))
+      y_range = (maybeToInt (List.maximum (List.map snd coordinates))) - (maybeToInt (List.minimum (List.map snd coordinates)))
+      x_deviation = maybeToInt (List.maximum (List.map abs (List.map fst coordinates)))
+      y_deviation = maybeToInt (List.maximum (List.map abs (List.map snd coordinates)))
    in
       {
-         -- w = round ((toFloat y_range*2)  * (r + margin) * cos (pi/6)),
-         -- h = round ((toFloat x_range) * (r + margin) * (1 + cos (pi/3)))
-         w = 600,
-         h = 600
+         w = x_deviation * 3*r + margin * x_range,
+         h = 200
       }
 
 
@@ -69,7 +63,7 @@ draw_hexagon : Float -> (Int, Int) -> Form
 draw_hexagon r (x, y) =
   let
     pos_x = (toFloat x) * (r + margin) * (1 + cos (pi/3))
-    pos_y = (toFloat (y*2 + (x % 2))) * (r + margin) * cos (pi/6)  --* (x//abs x))
+    pos_y = (toFloat (y*2 + (x % 2))) * (r + margin) * cos (pi/6)
   in
     ngon 6 r
     |> filled niceColor
