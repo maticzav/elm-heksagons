@@ -15,38 +15,14 @@ hexagons =
   ]
 
 
-trim_coordinates : List (Int, Int) -> List (Int, Int)
-trim_coordinates coordinates =
-   let
-      x_range = toFloat ((maybeToInt (List.maximum (List.map fst coordinates))) - (maybeToInt (List.minimum (List.map fst coordinates))))
-      y_range = toFloat ((maybeToInt (List.maximum (List.map snd coordinates))) - (maybeToInt (List.minimum (List.map snd coordinates))))
-      x_error = ceiling (x_range / 2.0) - (maybeToInt (List.maximum (List.map fst coordinates))) - (maybeToInt (List.maximum (List.map fst coordinates)) % 2)
-      y_error = ceiling (y_range / 2.0) - (maybeToInt (List.maximum (List.map snd coordinates)))
-   in
-      List.map (modify_coordinate (x_error , y_error)) coordinates
-
-
-modify_coordinate : (Int, Int) -> (Int, Int) -> (Int, Int)
-modify_coordinate init change =
-   let
-      (x,y) = init
-      (x_chg,y_chg) = change
-   in
-      (x+x_chg, y+y_chg)
-
-maybeToInt = withDefault 0
-
 withDefault : a -> Maybe a -> a
 withDefault default maybe =
     case maybe of
       Just value -> value
       Nothing -> default
 
-field = calculateFieldOfCoordinates hexagons r
-
-
-calculateFieldOfCoordinates : List (Int, Int) -> Int -> {w: Int, h: Int}
-calculateFieldOfCoordinates coordinates r =
+calculateFieldOfCoordinates : List (Int, Int) -> Int -> Int -> {w: Int, h: Int}
+calculateFieldOfCoordinates coordinates r margin =
    let
       x_range = (maybeToInt (List.maximum (List.map fst coordinates))) - (maybeToInt (List.minimum (List.map fst coordinates)))
       y_range = (maybeToInt (List.maximum (List.map snd coordinates))) - (maybeToInt (List.minimum (List.map snd coordinates)))
@@ -58,16 +34,36 @@ calculateFieldOfCoordinates coordinates r =
          h = 200
       }
 
+calculateCoordinatesOffset : List (Int, Int) -> Int -> Int -> {x: Int, y: Int}
+calculateCoordinatesOffset coordinates r margin =
+   let
+      minX = (maybeToInt (List.minimum (List.map fst coordinates)))
 
-draw_hexagon : Float -> (Int, Int) -> Form
-draw_hexagon r (x, y) =
+draw_hexagon : Float -> (Int, Int) -> (Int, Int)  -> Form
+draw_hexagon r (x_starting_point, y_starting_point) (x, y) =
   let
-    pos_x = (toFloat x) * (r + margin) * (1 + cos (pi/3))
-    pos_y = (toFloat (y*2 + (x % 2))) * (r + margin) * cos (pi/6)
+    pos_x = (toFloat x) * (r + margin) * (1 + cos (pi/3)) + x_starting_point
+    pos_y = (toFloat (y*2 + (x % 2))) * (r + margin) * cos (pi/6) + y_starting_point
   in
     ngon 6 r
     |> filled niceColor
     |> move (pos_x, pos_y)
+
+
+niceColor : Color
+niceColor =
+   let
+      r = 100
+      g = 200
+      b = 255
+   in
+      rgba r g b 0.3
+
+
+maybeToInt = withDefault 0
+field = calculateFieldOfCoordinates hexagons r margin
+hexagons_offset = calculateCoordinatesOffset hexagons
+
 
 draw_hexagons : List (Int, Int) -> List Form
 draw_hexagons hexagons =
@@ -82,12 +78,3 @@ draw =
 main : Element
 main = draw (draw_hexagons hexagons)
 -- main = draw (draw_hexagons hexagons)
-
-niceColor : Color
-niceColor =
-   let
-      r = 100
-      g = 200
-      b = 255
-   in
-      rgba r g b 0.3
