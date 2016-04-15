@@ -33,32 +33,35 @@ maxIntInList list =
    maybeToInt (List.maximum list)
 
 calculateHexagonPosition : Int -> Int -> (Int, Int) -> (Int , Int)
-calculateHexagonPosition r margin coordinates =
+calculateHexagonPosition r m (x,y) =
    let
-      pos_x = (toFloat x) * (r + margin) * (1 + cos (pi/3))
-      pos_y = (toFloat (y*2 + (x % 2))) * (r + margin) * cos (pi/6)
+      pos_x = (toFloat x) * ((3 * r + 2 * m) / 2)
+      pos_y = (toFloat y + toFloat (rem x 2)) * (sqrt 3 * r / 2 + m)
    in
       (pos_x, pos_y)
 
-hexagonPosition = calculateHexagonPosition r margin
+-- hexagonPosition = calculateHexagonPosition r margin
 
-calculateHexagonCoordinatesOffset : List (Int, Int) -> (Float, Float)
-calculateHexagonCoordinatesOffset coordinates =
+-- calculateHexagonCoordinatesOffset : List (Int, Int) -> (Float, Float)
+-- calculateHexagonCoordinatesOffset coordinates =
+--    let
+--       (minX, minY) = hexagonPosition (minIntInList (List.map fst coordinates), minIntInList (List.map snd coordinates))
+--       (maxX, maxY) = hexagonPosition (maxIntInList (List.map fst coordinates), maxIntInList (List.map snd coordinates))
+--       offsetX = (toFloat maxX - toFloat minX) / 2.0
+--       offsetY = (toFloat maxY - toFloat minY) / 2.0
+--    in
+--       (offsetX, offsetY)
+
+
+calculateHexagonsField : List (Int, Int) -> Int -> Int -> (Int, Int)
+calculateHexagonsField (x_dev, y_dev) m r =
    let
-      (minX, minY) = hexagonPosition (minIntInList (List.map fst coordinates), minIntInList (List.map snd coordinates))
-      (maxX, maxY) = hexagonPosition (maxIntInList (List.map fst coordinates), maxIntInList (List.map snd coordinates))
-      offsetX = (toFloat maxX - toFloat minX) / 2.0
-      offsetY = (toFloat maxY - toFloat minY) / 2.0
+      x = (x_dev + 2) * r + (x_dev - 1) * m - (r / 2 - m) * (1 - rem x_dev 2)
+      v = sqrt 3 * r / 2
+      d = length (List.filter (a -> Bool) List a)
+      y = (n + 2) * v + (n - 1) * m + (v + m) * d
    in
-      (offsetX, offsetY)
-calculateHexagonsField : List (Int, Int) -> (Int, Int)
-calculateHexagonsField coordinates =
-   let
-      (minX, minY) = hexagonPosition (minIntInList (List.map fst coordinates), minIntInList (List.map snd coordinates))
-      (maxX, maxY) = hexagonPosition (maxIntInList (List.map fst coordinates), maxIntInList (List.map snd coordinates))
-      (w, h) = hexagonPosition ((maxX - minX + 2), (maxY - minY))
-   in
-      (w, h)
+      (x,y)
 
 
 niceColor : Color
