@@ -15,6 +15,17 @@ hexagons =
   ]
 
 
+-- MOVED represnts which lines are moved higher
+-- 0: even lines are higher
+-- 1: odd lines are higher
+movedLines = 1
+
+isMoved : Int -> Int
+isMoved a =
+   if rem a 2 == movedLines then
+      1
+   else
+      0
 
 withDefault : a -> Maybe a -> a
 withDefault default maybe =
@@ -36,33 +47,39 @@ calculateHexagonPosition : Int -> Int -> (Int, Int) -> (Int , Int)
 calculateHexagonPosition r m (x,y) =
    let
       pos_x = (toFloat x) * ((3 * r + 2 * m) / 2)
-      pos_y = (toFloat y + toFloat (rem x 2)) * (sqrt 3 * r / 2 + m)
+      pos_y = (toFloat y + toFloat (isMoved(x)) * (sqrt 3 * r / 2 + m)
    in
       (pos_x, pos_y)
 
--- hexagonPosition = calculateHexagonPosition r margin
-
--- calculateHexagonCoordinatesOffset : List (Int, Int) -> (Float, Float)
--- calculateHexagonCoordinatesOffset coordinates =
---    let
---       (minX, minY) = hexagonPosition (minIntInList (List.map fst coordinates), minIntInList (List.map snd coordinates))
---       (maxX, maxY) = hexagonPosition (maxIntInList (List.map fst coordinates), maxIntInList (List.map snd coordinates))
---       offsetX = (toFloat maxX - toFloat minX) / 2.0
---       offsetY = (toFloat maxY - toFloat minY) / 2.0
---    in
---       (offsetX, offsetY)
+visa : List (Int, Int) -> (Int -> Int) -> Int
+visa coordinates isMoved =
+   let
+      
 
 
-calculateHexagonsField : List (Int, Int) -> Int -> Int -> (Int, Int)
-calculateHexagonsField (x_dev, y_dev) m r =
+calculateHexagonsField : (Int, Int) -> Int -> Int -> Int -> (Int, Int)
+calculateHexagonsField (x_dev, y_dev) d m r =
    let
       x = (x_dev + 2) * r + (x_dev - 1) * m - (r / 2 - m) * (1 - rem x_dev 2)
       v = sqrt 3 * r / 2
-      d = length (List.filter (a -> Bool) List a)
       y = (n + 2) * v + (n - 1) * m + (v + m) * d
    in
       (x,y)
 
+
+-- calculateFirstAndLastPointsOfField : ((Int,Int), (Int,Int)) -> ((Int,Int), (Int,Int))
+-- calculateFirstAndLastPointsOfField ((xrs, xre) , (yrs, yre)) =
+--
+--
+--
+-- calculateHexagonCoordinatesOffset : List (Int, Int) -> Int -> Int -> Int -> (Int, Int)
+-- calculateHexagonCoordinatesOffset coordinates =
+--    let
+--
+--    in
+--       (offsetX, offsetY)
+--
+--
 
 niceColor : Color
 niceColor =
